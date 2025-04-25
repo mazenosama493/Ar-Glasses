@@ -14,7 +14,7 @@ root.title("AR EyeConic")
 root.attributes('-fullscreen', True)
 
 
-# Video frame
+
 video_label = Label(root)
 video_label.pack(fill=tk.BOTH, expand=True)
 
