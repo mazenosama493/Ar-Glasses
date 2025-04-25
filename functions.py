@@ -15,16 +15,6 @@ import time
 import threading
 import tkinter as tk
 
-def show_loading_screen(message="Loading translation model..."):
-    loading_text = tk.StringVar()
-    loading_text.set(message)
-    loading_label = tk.Label(root, textvariable=loading_text, font=("Arial", 24), bg="black", fg="white")
-    loading_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-    root.update()  # Force update the GUI
-    return loading_label
-
-
-
 def connected_func(model, display_output=None, display_output2=None):
     if is_connected():
         display_output2("hello you are connected do you want to use our online assistant or offline assistant")
