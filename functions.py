@@ -105,20 +105,20 @@ def translate_text(text,pipe):
         return None
 def get_lang1(model, display_output=None, display_output2=None):
     while True:
-        speak("What is the language you will be using")
         display_output2("What is the language you will be using")
+        speak("What is the language you will be using")
         x = get_audio(model, display_output, display_output2).strip().lower()
 
         normalized_keys = {key.lower(): key for key in vosk_languages}
 
         if x in normalized_keys:
             original_key = normalized_keys[x]
-            m = vosk_languages[original_key]
+            l1 = vosk_languages[original_key]
             break
         else:
-            speak("I cannot recognize the language you're trying to translate. Try again, please.")
-            display_output2("I cannot recognize the language you're trying to translate. Try again, please.")
-    return m
+            display_output2("I cannot recognize the language you're trying to use. Try again, please.")
+            speak("I cannot recognize the language you're trying to use. Try again, please.")
+    return l1
 
 
 def get_lang2(model, display_output=None, display_output2=None):
@@ -131,12 +131,29 @@ def get_lang2(model, display_output=None, display_output2=None):
 
         if s in normalized_keys:
             original_key = normalized_keys[s]
-            s = vosk_languages[original_key]
+            l2 = vosk_languages[original_key]
             break
         else:
-            display_output2("I cannot recognize the language you're trying to translate. Try again, please.")
-            speak("I cannot recognize the language you're trying to translate. Try again, please.")
-    return s
+            display_output2("I cannot recognize the language you're trying to translate to. Try again, please.")
+            speak("I cannot recognize the language you're trying to translate to. Try again, please.")
+    return l2
+
+def get_lang3(model, display_output=None, display_output2=None):
+    while True:
+        display_output2("What is the language you are trying to detect")
+        speak("What is the language you are trying to detect")
+        l = get_audio(model, display_output, display_output2).strip().lower()
+
+        normalized_keys = {key.lower(): key for key in vosk_languages}
+
+        if l in normalized_keys:
+            original_key = normalized_keys[l]
+            l3 = vosk_languages[original_key]
+            break
+        else:
+            display_output2("I cannot recognize the language you're trying to detect. Try again, please.")
+            speak("I cannot recognize the language you're trying to detect. Try again, please.")
+    return l3
 
 def speak(text):
     engine = pyttsx3.init(driverName='sapi5')  

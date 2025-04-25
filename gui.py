@@ -10,7 +10,7 @@ from vosk import Model
 
 # Setup GUI
 root = tk.Tk()
-root.title("AR Glasses Assistant")
+root.title("AR EyeConic")
 root.attributes('-fullscreen', True)
 
 
@@ -155,10 +155,10 @@ def voice_loop():
                             speak("No text recognized")
 
             elif data == "image":
-                l1 = get_lang1(model, display_output, display_output2)
+                l3 = get_lang3(model, display_output, display_output2)
                 l2 = get_lang2(model, display_output, display_output2)
                 loading_label = show_loading_screen("Loading image translation...")
-                m = translate_model(l1, l2)
+                m = translate_model(l3, l2)
                 hide_loading_screen(loading_label)
                 
                 while True:
@@ -167,14 +167,13 @@ def voice_loop():
                     else:
                         break
                     model = reset(model_path)
-                    capture_image_from_camera(cap, model, display_output, display_output2)
                     if capture_image_from_camera(cap, model, display_output, display_output2):
                         pass
                     else:
                         break
                     filename = "captured_image.jpg"
                     file1 = filepath(filename)
-                    lang = img_lang_det(l1)
+                    lang = img_lang_det(l3)
                     t = recognize_text(file1, lang)
                     print(t)
                     display_output3(f"Image Text: {t}")
@@ -182,9 +181,8 @@ def voice_loop():
                     speak(translated_text)
                     display_output4(f"Translated: {translated_text}")
                     print(translated_text)
-                    speak("do you want to continue yes or no")
                     display_output2("do you want to continue yes or no")
-                    model = reset(model_path)
+                    speak("do you want to continue yes or no")
                     b = get_audio(model, display_output, display_output2)
                     if b == "yes":
                         pass
