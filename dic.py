@@ -37,6 +37,27 @@ tesseract_languages = {
     "Polish": "pol"
 }
 
+
+vosk_to_tesseract = {
+    "en": "eng",
+    "ar": "ara",
+    "es": "spa",
+    "fr": "fra",
+    "de": "deu",
+    "ru": "rus",
+    "pt": "por",
+    "cn": "chi_sim",
+    "tr": "tur",
+    "it": "ita",
+    "uk": "ukr",
+    "nl": "nld",
+    "hi": "hin",
+    "vi": "vie",
+    "ko": "kor",
+    "ja": "jpn",
+    "pl": "pol"
+}
+
 vosk_model_paths = {
     "ar": r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-ar-mgb2-0.4",
     "en": r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-en-us-daanzu-20200905-lgraph",

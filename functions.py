@@ -52,7 +52,7 @@ def capture_image_from_camera(cap, model, display_output=None, display_output2=N
                 cv2.imwrite(filename, frame)
                 print(f"Image captured: {filename}")
                 display_output2(f"Image captured: {filename}")
-                return filename
+                return True
             else:
                 print("Error: Could not read frame from camera")
                 display_output2("Error: Could not read frame from camera")
@@ -61,7 +61,7 @@ def capture_image_from_camera(cap, model, display_output=None, display_output2=N
         elif command and "get out" in command.lower():
             print("Exiting capture mode")
             display_output2("Exiting capture mode")
-            return None
+            return False
 def recognize_text(image_path, lang="eng"):
     try:
         pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -202,21 +202,8 @@ def tool_detection(model, display_output=None, display_output2=None):
             display_output2("i cannot recognize the data type   please try again ")
             speak("i cannot recognize the data type   please try again ")
     return r
-def img_lang_det(model, display_output=None, display_output2=None):
-    while True:
-        display_output2("What is the language you are trying to detect from the image?")
-        speak("What is the language you are trying to detect from the image?")
-        x = get_audio(model, display_output, display_output2).strip().lower()
-
-        normalized_keys = {key.lower(): key for key in tesseract_languages}
-
-        if x in normalized_keys:
-            original_key = normalized_keys[x]
-            lang = tesseract_languages[original_key]
-            return lang
-        else:
-            display_output2("I cannot recognize the language or it is not supported. Please try again.")
-            speak("I cannot recognize the language or it is not supported. Please try again.")
+def img_lang_det(l1):
+    return vosk_to_tesseract.get(l1, "eng")
 def reset(model_path):
     if model_path!=r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-en-us-daanzu-20200905-lgraph":
         model_path=r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-en-us-daanzu-20200905-lgraph"

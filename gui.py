@@ -124,15 +124,13 @@ def voice_loop():
             speak(f"hello {user} how are you")
             data = tool_detection(model, display_output, display_output2)
 
-            l1 = get_lang1(model, display_output, display_output2)
-            l2 = get_lang2(model, display_output, display_output2)
-
-            if l1 != "en":
-                model_path = recognition_model(l1)
-                model = Model(model_path)
 
             if data == "speech":
-                # Show loading screen
+                l1 = get_lang1(model, display_output, display_output2)
+                l2 = get_lang2(model, display_output, display_output2)
+                if l1 != "en":
+                    model_path = recognition_model(l1)
+                    model = Model(model_path)
                 loading_label = show_loading_screen("Loading speech translation...")
                 x = translate_model(l1, l2)
                 hide_loading_screen(loading_label)
@@ -157,7 +155,8 @@ def voice_loop():
                             speak("No text recognized")
 
             elif data == "image":
-                # Show loading screen
+                l1 = get_lang1(model, display_output, display_output2)
+                l2 = get_lang2(model, display_output, display_output2)
                 loading_label = show_loading_screen("Loading image translation...")
                 m = translate_model(l1, l2)
                 hide_loading_screen(loading_label)
@@ -169,9 +168,13 @@ def voice_loop():
                         break
                     model = reset(model_path)
                     capture_image_from_camera(cap, model, display_output, display_output2)
+                    if capture_image_from_camera(cap, model, display_output, display_output2):
+                        pass
+                    else:
+                        break
                     filename = "captured_image.jpg"
                     file1 = filepath(filename)
-                    lang = img_lang_det(model, display_output, display_output2)
+                    lang = img_lang_det(l1)
                     t = recognize_text(file1, lang)
                     print(t)
                     display_output3(f"Image Text: {t}")
