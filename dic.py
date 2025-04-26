@@ -59,9 +59,25 @@ vosk_to_tesseract = {
 }
 
 vosk_model_paths = {
-    "ar": r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-ar-mgb2-0.4",
     "en": r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-en-us-daanzu-20200905-lgraph",
-    "fr": r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-small-fr-0.22"
+    "ar": r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-ar-mgb2-0.4",
+    "es": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-es-0.42",
+    "fr": r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-small-fr-0.22",
+    "de": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-de-0.15",
+    "ru": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-ru-0.22",
+    "pt": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-pt-0.3",
+    "cn": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-cn-0.22",
+    "tr": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-tr-0.3",
+    "it": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-it-0.22",
+    "uk": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-uk-v3-nano",
+    "nl": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-nl-0.22",
+    "hi": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-hi-0.22",
+    "vi": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-vn-0.4",
+    "ko": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-ko-0.22",
+    "ja": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-ja-0.22",
+    "pl": r"C:\Users\COMPUMARTS\Desktop\vosk\gradproj\vosk-model-small-pl-0.22"
+
+
 }
 
 

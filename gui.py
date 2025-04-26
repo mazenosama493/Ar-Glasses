@@ -13,33 +13,109 @@ root = tk.Tk()
 root.title("AR EyeConic")
 root.attributes('-fullscreen', True)
 
+try:
+    logo_image = Image.open("logo.png")
+    logo_image = logo_image.resize((100, 100), Image.Resampling.LANCZOS)
+    logo_photo = ImageTk.PhotoImage(logo_image)
+except Exception as e:
+    print(f"Error loading logo: {e}")
+    logo_photo = None
 
+# Create a frame for the header that will contain the logo
+header_frame = tk.Frame(root, bg='black')
+header_frame.pack(side=tk.TOP, fill=tk.X)
 
+# Add the logo to the header
+if logo_photo:
+    logo_label = tk.Label(header_frame, image=logo_photo, bg='black')
+    logo_label.image = logo_photo  # Keep a reference
+    logo_label.pack(side=tk.LEFT, padx=10, pady=5)
+
+# Add application title next to the logo
+title_label = tk.Label(header_frame, text="AR EyeConic", font=("Arial", 20), 
+                      bg='black', fg='white')
+title_label.pack(side=tk.LEFT, padx=10)
+
+# Modify your existing video label to account for the header
 video_label = Label(root)
 video_label.pack(fill=tk.BOTH, expand=True)
 
 
-bottom_text = tk.StringVar()
-bottom_label = tk.Label(root, textvariable=bottom_text, font=("Arial", 16), bg="black", fg="white")
-bottom_label.place(relx=0.5, rely=0.95, anchor=tk.S)
+# First, let's create a modern frame to contain all the text elements
+text_display_frame = tk.Frame(root, bg='#121212')  # Dark background
+text_display_frame.place(relx=0, rely=0.7, relwidth=1, relheight=0.3)  # Takes bottom 30% of screen
 
+# Custom font setup
+custom_font = ("Segoe UI", 14)  # More modern than Arial
+title_font = ("Segoe UI Semibold", 16)
 
-bottom_text2=tk.StringVar()
-bottom_label2=tk.Label(root, textvariable=bottom_text2, font=("Arial", 16), bg="black", fg="white")
-bottom_label2.place(relx=0.5, rely=0.9, anchor=tk.S)
+# Main interaction text (previously bottom_text2)
+interaction_frame = tk.Frame(text_display_frame, bg='#1E1E1E', bd=0, highlightthickness=0)
+interaction_frame.pack(fill=tk.X, padx=20, pady=(10, 5))
 
+interaction_text = tk.StringVar()
+interaction_label = tk.Label(
+    interaction_frame, 
+    textvariable=interaction_text, 
+    font=title_font,
+    bg='#1E1E1E',
+    fg='#4FC3F7',  # Light blue accent color
+    justify=tk.LEFT,
+    wraplength=root.winfo_screenwidth() - 40  # Auto-wrap text
+)
+interaction_label.pack(fill=tk.X, padx=10, pady=5)
 
-bottom_text3=tk.StringVar()
-bottom_label3=tk.Label(root, textvariable=bottom_text3, font=("Arial", 16), bg="black", fg="white")
-bottom_label3.place(relx=0.9, rely=0.5, anchor=tk.S)
+# Assistant response text (previously bottom_text)
+response_frame = tk.Frame(text_display_frame, bg='#1E1E1E', bd=0, highlightthickness=0)
+response_frame.pack(fill=tk.X, padx=20, pady=5)
 
-bottom_text4=tk.StringVar()
-bottom_label4=tk.Label(root, textvariable=bottom_text4, font=("Arial", 16), bg="black", fg="white")
-bottom_label4.place(relx=0.1, rely=0.5, anchor=tk.S)
+response_text = tk.StringVar()
+response_label = tk.Label(
+    response_frame, 
+    textvariable=response_text, 
+    font=custom_font,
+    bg='#1E1E1E',
+    fg='#FFFFFF',  # Pure white
+    justify=tk.LEFT,
+    wraplength=root.winfo_screenwidth() - 40
+)
+response_label.pack(fill=tk.X, padx=10, pady=5)
 
-model_path = vosk_model_paths["en"]
-model = Model(model_path)
-eng_model, eng_tokenizer = translate_en()
+# Translated text display (previously bottom_text4)
+translation_frame = tk.Frame(text_display_frame, bg='#252525', bd=0, highlightthickness=0)
+translation_frame.pack(fill=tk.X, padx=20, pady=5)
+
+translation_text = tk.StringVar()
+translation_label = tk.Label(
+    translation_frame, 
+    textvariable=translation_text, 
+    font=custom_font,
+    bg='#252525',
+    fg='#81C784',  # Soft green for translations
+    justify=tk.LEFT,
+    wraplength=root.winfo_screenwidth() - 40
+)
+translation_label.pack(fill=tk.X, padx=10, pady=5)
+
+# Image text display (previously bottom_text3)
+image_text_frame = tk.Frame(text_display_frame, bg='#252525', bd=0, highlightthickness=0)
+image_text_frame.pack(fill=tk.X, padx=20, pady=(5, 10))
+
+image_text = tk.StringVar()
+image_text_label = tk.Label(
+    image_text_frame, 
+    textvariable=image_text, 
+    font=custom_font,
+    bg='#252525',
+    fg='#FFB74D',  # Soft orange for image text
+    justify=tk.LEFT,
+    wraplength=root.winfo_screenwidth() - 40
+)
+image_text_label.pack(fill=tk.X, padx=10, pady=5)
+
+# Add subtle separators between sections
+separator_style = {"bg": "#333333", "height": 1}
+tk.Frame(text_display_frame, **separator_style).pack(fill=tk.X, pady=2)
 
 background_label = Label(root, bg='black')  # Background label
 background_label.pack(fill=tk.BOTH, expand=True)
@@ -85,28 +161,45 @@ def hide_loading_screen(loading_label):
 # OpenCV setup
 cap = cv2.VideoCapture(0)
 
+model_path = vosk_model_paths["en"]
+model = Model(model_path)
+eng_model, eng_tokenizer = translate_en()
+
+camera_running = True
+camera_thread = None
+
 def update_camera():
-    while True:
+    while camera_running:
         ret, frame = cap.read()
         if ret:
+            # Get available space (window height minus header)
             w = video_label.winfo_width()
-            h = video_label.winfo_height()
-            frame = cv2.resize(frame, (w, h))
-
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            img = ImageTk.PhotoImage(Image.fromarray(frame))
-            video_label.config(image=img)
-            video_label.image = img
+            h = root.winfo_height() - header_frame.winfo_height()
+            
+            # Only resize if we have valid dimensions
+            if w > 0 and h > 0:
+                frame = cv2.resize(frame, (w, h))
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                img = ImageTk.PhotoImage(Image.fromarray(frame))
+                video_label.config(image=img)
+                video_label.image = img
         time.sleep(0.03)
 
 def display_output(text):
-    bottom_text.set(text)
+    """For assistant responses"""
+    response_text.set(text)
+
 def display_output2(text):
-    bottom_text2.set(text)
+    """For user interactions/questions"""
+    interaction_text.set(text)
+
 def display_output3(text): 
-    bottom_text3.set(text)
+    """For image text recognition"""
+    image_text.set(f"Image Text: {text}")
+
 def display_output4(text):
-    bottom_text4.set(text)
+    """For translations"""
+    translation_text.set(f"Translated: {text}")
 
 def voice_loop():
     user = "mazen"
@@ -132,7 +225,7 @@ def voice_loop():
                     model_path = recognition_model(l1)
                     model = Model(model_path)
                 loading_label = show_loading_screen("Loading speech translation...")
-                x = translate_model(l1, l2)
+                x = translate_model(l1, l2,display_output2)
                 hide_loading_screen(loading_label)
                 
                 while True:
@@ -147,7 +240,7 @@ def voice_loop():
                         break
                     else:
                         if text:
-                            translated_text = translate_text(text, x)
+                            translated_text = translate_text(text, x,display_output2)
                             display_output4(f"Translated: {translated_text}")
                             speak(translated_text)
                         else:
@@ -158,7 +251,7 @@ def voice_loop():
                 l3 = get_lang3(model, display_output, display_output2)
                 l2 = get_lang2(model, display_output, display_output2)
                 loading_label = show_loading_screen("Loading image translation...")
-                m = translate_model(l3, l2)
+                m = translate_model(l3, l2,display_output2)
                 hide_loading_screen(loading_label)
                 
                 while True:
@@ -177,14 +270,11 @@ def voice_loop():
                     t = recognize_text(file1, lang)
                     print(t)
                     display_output3(f"Image Text: {t}")
-                    translated_text = translate_text(t, m)
+                    translated_text = translate_text(t, m,display_output2)
                     speak(translated_text)
                     display_output4(f"Translated: {translated_text}")
                     print(translated_text)
-                    display_output2("do you want to continue yes or no")
-                    speak("do you want to continue yes or no")
-                    b = get_audio(model, display_output, display_output2)
-                    if b == "yes":
+                    if detect_continue(model, display_output2):
                         pass
                     else:
                         break

@@ -86,7 +86,7 @@ def translate_to_english(text,model,tokenizer):
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
     translated = model.generate(**inputs)
     return tokenizer.decode(translated[0], skip_special_tokens=True)
-def translate_model(source_language="en",target_language="ar"):
+def translate_model(source_language="en",target_language="ar", display_output2=None):
     try:
         model_name = f'Helsinki-NLP/opus-mt-{source_language}-{target_language}'
         pipe = pipeline("translation", model=model_name)
@@ -95,7 +95,7 @@ def translate_model(source_language="en",target_language="ar"):
         display_output2("this model is not available")
         speak ("this model is not available")
     
-def translate_text(text,pipe):
+def translate_text(text,pipe, display_output2=None):
     try:
         translated_text = pipe(text)[0]['translation_text'] 
         return translated_text
@@ -228,3 +228,16 @@ def reset(model_path):
     else:
         model=Model(model_path)
     return model
+
+def detect_continue(model, display_output2=None):
+    while True:
+        display_output2("Do you want to continue?")
+        speak("Do you want to continue?")
+        x = get_audio(model, display_output2).strip().lower()
+        if "yes" in x:
+            return True
+        elif "no" in x:
+            return False
+        else:
+            display_output2("I cannot recognize your answer. Please try again.")
+            speak("I cannot recognize your answer. Please try again.")
