@@ -128,10 +128,6 @@ tk.Frame(left_panel, bg='#333333', height=1).pack(fill=tk.X, pady=1)
 background_label = Label(root, bg='black')
 background_label.pack(fill=tk.BOTH, expand=True)
 
-# Camera Control
-camera_running = True
-camera_thread = None
-
 def show_loading_screen(message="Loading..."):
     global camera_running
     camera_running = False
@@ -156,8 +152,12 @@ def hide_loading_screen(loading_label):
         camera_thread = threading.Thread(target=update_camera, daemon=True)
         camera_thread.start()
 
-# Camera Setup
+
 cap = cv2.VideoCapture(0)
+camera_running = True
+camera_thread = None
+
+
 model_path = vosk_model_paths["en"]
 model = Model(model_path)
 eng_model, eng_tokenizer = translate_en()
