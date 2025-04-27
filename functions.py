@@ -241,3 +241,4 @@ def detect_continue(model, display_output2=None):
         else:
             display_output2("I cannot recognize your answer. Please try again.")
             speak("I cannot recognize your answer. Please try again.")
+
