@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import Label, StringVar
 from PIL import Image, ImageTk
-import cv2
 import threading
 import time
 from functions import *
 from dic import *
 from vosk import Model
 import mediapipe as mp
+#from picamera2 import Picamera2
+import cv2
 
 # Setup GUI
 root = tk.Tk()
@@ -17,7 +18,6 @@ root.attributes('-fullscreen', True)
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(max_num_hands=1)
 mp_drawing = mp.solutions.drawing_utils
-
 
 LABELS_WIDTH_PERCENT = 0.3
 CAMERA_WIDTH_PERCENT = 1 - LABELS_WIDTH_PERCENT
@@ -43,177 +43,128 @@ title_label = tk.Label(header_frame, text="AR EyeConic", font=("Arial", 20),
                       bg='black', fg='white')
 title_label.pack(side=tk.LEFT, padx=10)
 
-# Main Content Frame - Initially only contains camera view
+# Main Content Frame
 content_frame = tk.Frame(root, bg='black')
 content_frame.pack(fill=tk.BOTH, expand=True)
 
-# Right Panel - Camera View (100% width initially)
 right_panel = tk.Frame(content_frame, bg='black')
 right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
 video_label = Label(right_panel)
 video_label.pack(fill=tk.BOTH, expand=True)
 
-# Left Panel - Text Display (40% width when visible)
 left_panel = tk.Frame(content_frame, bg='#121212', width=int(root.winfo_screenwidth()*LABELS_WIDTH_PERCENT))
 
-# Text Display Elements
+# Text Elements
 custom_font = ("Segoe UI", 12)
 title_font = ("Segoe UI Semibold", 14)
-
-# Calculate wrap length based on new width
 wrap_length = int(root.winfo_screenwidth()*LABELS_WIDTH_PERCENT) - 20
 
-# Interaction Text
 interaction_frame = tk.Frame(left_panel, bg='#1E1E1E')
 interaction_frame.pack(fill=tk.X, padx=5, pady=(5, 2), expand=True)
 
 interaction_text = tk.StringVar()
-interaction_label = tk.Label(
-    interaction_frame, 
-    textvariable=interaction_text, 
-    font=title_font,
-    bg='#1E1E1E',
-    fg='#4FC3F7',
-    justify=tk.LEFT,
-    wraplength=wrap_length,
-    anchor='w'
-)
+interaction_label = tk.Label(interaction_frame, textvariable=interaction_text, font=title_font, bg='#1E1E1E', fg='#4FC3F7', justify=tk.LEFT, wraplength=wrap_length, anchor='w')
 interaction_label.pack(fill=tk.X, padx=5, pady=2, expand=True)
 
-# Response Text
 response_frame = tk.Frame(left_panel, bg='#1E1E1E')
 response_frame.pack(fill=tk.X, padx=5, pady=2, expand=True)
 
 response_text = tk.StringVar()
-response_label = tk.Label(
-    response_frame, 
-    textvariable=response_text, 
-    font=custom_font,
-    bg='#1E1E1E',
-    fg='#FFFFFF',
-    justify=tk.LEFT,
-    wraplength=wrap_length,
-    anchor='w'
-)
+response_label = tk.Label(response_frame, textvariable=response_text, font=custom_font, bg='#1E1E1E', fg='#FFFFFF', justify=tk.LEFT, wraplength=wrap_length, anchor='w')
 response_label.pack(fill=tk.X, padx=5, pady=2, expand=True)
 
-# Translation Text
 translation_frame = tk.Frame(left_panel, bg='#252525')
 translation_frame.pack(fill=tk.X, padx=5, pady=2, expand=True)
 
 translation_text = tk.StringVar()
-translation_label = tk.Label(
-    translation_frame, 
-    textvariable=translation_text, 
-    font=custom_font,
-    bg='#252525',
-    fg='#81C784',
-    justify=tk.LEFT,
-    wraplength=wrap_length,
-    anchor='w'
-)
+translation_label = tk.Label(translation_frame, textvariable=translation_text, font=custom_font, bg='#252525', fg='#81C784', justify=tk.LEFT, wraplength=wrap_length, anchor='w')
 translation_label.pack(fill=tk.X, padx=5, pady=2, expand=True)
 
-# Image Text
 image_text_frame = tk.Frame(left_panel, bg='#252525')
 image_text_frame.pack(fill=tk.X, padx=5, pady=(2, 5), expand=True)
 
 image_text = tk.StringVar()
-image_text_label = tk.Label(
-    image_text_frame, 
-    textvariable=image_text, 
-    font=custom_font,
-    bg='#252525',
-    fg='#FFB74D',
-    justify=tk.LEFT,
-    wraplength=wrap_length,
-    anchor='w'
-)
+image_text_label = tk.Label(image_text_frame, textvariable=image_text, font=custom_font, bg='#252525', fg='#FFB74D', justify=tk.LEFT, wraplength=wrap_length, anchor='w')
 image_text_label.pack(fill=tk.X, padx=5, pady=2, expand=True)
 
-# Separator
 tk.Frame(left_panel, bg='#333333', height=1).pack(fill=tk.X, pady=1)
 
 background_label = Label(root, bg='black')
 background_label.pack(fill=tk.BOTH, expand=True)
 
 last_gesture_time = 0
-gesture_cooldown = 1  # in seconds, adjust as needed
-labels_visible = False # Start with labels hidden
+gesture_cooldown = 1
+labels_visible = False
+
+# Setup Picamera2
+#picam2 = Picamera2()
+#picam2.configure(picam2.create_preview_configuration(main={"format": "RGB888", "size": (1280, 720)}))
+#picam2.start()
+
+camera_running = True
+camera_thread = None
+frame_counter = 0
+
+model_path = vosk_model_paths["en"]
+model = Model(model_path)
+eng_model, eng_tokenizer = translate_en()
 
 def show_labels():
-    global labels_visible, LABELS_WIDTH_PERCENT
+    global labels_visible
     if not labels_visible:
-        
-        # Recalculate the width of the left panel
         left_panel.config(width=int(root.winfo_screenwidth() * LABELS_WIDTH_PERCENT))
-        wrap_length = int(root.winfo_screenwidth() * LABELS_WIDTH_PERCENT) - 20
-        
-        # Repack the left panel and the right panel with the updated width
         left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=False)
         left_panel.pack_propagate(False)
-        
-        # Reconfigure the right panel to take the remaining space
         right_panel.pack_forget()
         right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-        
         labels_visible = True
         root.update()
 
 def hide_labels():
-    global labels_visible, LABELS_WIDTH_PERCENT
+    global labels_visible
     if labels_visible:
-
         left_panel.pack_forget()
         right_panel.pack_forget()
         right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-        
         labels_visible = False
         root.update()
 
 def detect_hand_gesture(frame):
-    global last_gesture_time, labels_visible
-    
-    # Convert the BGR image to RGB
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    
-    # Process the frame with MediaPipe Hands
-    results = hands.process(frame_rgb)
-    
-    # If hands are detected
-    if results.multi_hand_landmarks:
-        for hand_landmarks in results.multi_hand_landmarks:
-            # Get landmarks for all fingers (thumb, index, middle, ring, pinky)
-            thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
-            index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-            middle_tip = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
-            ring_tip = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
-            pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
-            
-            # Check if all fingers are extended (distance between tips and base should be larger than a threshold)
-            extended_fingers = 0
-            if index_tip.y < hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].y:
-                extended_fingers += 1
-            if middle_tip.y < hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].y:
-                extended_fingers += 1
-            if ring_tip.y < hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y:
-                extended_fingers += 1
-            if pinky_tip.y < hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].y:
-                extended_fingers += 1
-            if thumb_tip.x > hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].x:
-                extended_fingers += 1
-            
-            # If all fingers are extended, it's a "five" gesture
-            if extended_fingers == 5 and (time.time() - last_gesture_time) > gesture_cooldown:
-                last_gesture_time = time.time()
-                show_labels()
-            
-            # If not all fingers extended, hide labels
-            elif extended_fingers != 5 and labels_visible:
-                hide_labels()
+    global last_gesture_time, labels_visible, frame_counter
+    frame_counter += 1
+    if frame_counter % 5 == 0:
+        small_frame = cv2.resize(frame,(0,0),fx=0.5,fy=0.5)
+        small_frame_rgb = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
+        results = hands.process(small_frame_rgb)
 
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+                index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+                middle_tip = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+                ring_tip = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]  # Fixed
+                pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]  # Fixed
+                extended_fingers = 0
+                if index_tip.y < hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].y:
+                    extended_fingers += 1
+                if middle_tip.y < hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].y:
+                    extended_fingers += 1
+                if ring_tip.y < hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y:
+                    extended_fingers += 1
+                if pinky_tip.y < hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].y:
+                    extended_fingers += 1
+                if thumb_tip.x > hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].x:
+                    extended_fingers += 1
+
+                if extended_fingers == 5 and (time.time() - last_gesture_time) > gesture_cooldown:
+                    last_gesture_time = time.time()
+                    show_labels()
+                elif extended_fingers != 5 and labels_visible:
+                    hide_labels()
     return frame
+
+
 
 def show_loading_screen(message="Loading..."):
     global camera_running
@@ -343,7 +294,7 @@ def voice_loop():
                     translated_text = translate_text(t, m, display_output2)
                     speak(translated_text)
                     display_output4(translated_text)
-                    if not detect_continue(model, display_output2):
+                    if not detect_continue(model,display_output, display_output2):
                         display_output2("Goodbye!")
                         speak("Goodbye!")
                         display_output4("")

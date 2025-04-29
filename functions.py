@@ -233,7 +233,7 @@ def detect_continue(model, display_output2=None):
     while True:
         display_output2("Do you want to continue?")
         speak("Do you want to continue?")
-        x = get_audio(model, display_output2).strip().lower()
+        x = get_audio(model, display_output, display_output2).strip().lower()
         if "yes" in x:
             return True
         elif "no" in x:
