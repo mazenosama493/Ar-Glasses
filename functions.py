@@ -222,12 +222,11 @@ def tool_detection(model, display_output=None, display_output2=None):
 def img_lang_det(l1):
     return vosk_to_tesseract.get(l1, "eng")
 def reset(model_path):
-    if model_path!=r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-en-us-daanzu-20200905-lgraph":
-        model_path=r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-en-us-daanzu-20200905-lgraph"
-        model= Model(model_path)
-    else:
-        model=Model(model_path)
-    return model
+        if model_path!=r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-en-us-daanzu-20200905-lgraph":
+            model_path=r"C:\Users\COMPUMARTS\Desktop\gradproj\vosk-model-en-us-daanzu-20200905-lgraph"
+        else:
+            pass
+        return model_path
 
 def detect_continue(model, display_output2=None):
     while True:

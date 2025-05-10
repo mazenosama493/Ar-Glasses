@@ -9,6 +9,7 @@ from vosk import Model
 import mediapipe as mp
 #from picamera2 import Picamera2
 import cv2
+import speech_recognition as sr
 
 # Setup GUI
 root = tk.Tk()
@@ -109,6 +110,8 @@ frame_counter = 0
 model_path = vosk_model_paths["en"]
 model = Model(model_path)
 eng_model, eng_tokenizer = translate_en()
+
+
 
 def show_labels():
     global labels_visible
@@ -235,7 +238,7 @@ def voice_loop():
     global model_path, model
 
     while True:
-        model = reset(model_path)
+        model = Model(reset(model_path))
         if not display_output2("Say Hi to David"):
             display_output2("Say Hi to David")
         text = get_audio(model, display_output, display_output2)
@@ -283,7 +286,7 @@ def voice_loop():
                 while True:
                     if not m:
                         break
-                    model = reset(model_path)
+                    model = Model(reset(model_path))
                     if not capture_image_from_camera(cap, model, display_output, display_output2):
                         break
                     filename = "captured_image.jpg"
@@ -300,6 +303,9 @@ def voice_loop():
                         display_output4("")
                         display_output3("")
                         break
+
+
+
 
 # Start with labels hidden
 hide_labels()
